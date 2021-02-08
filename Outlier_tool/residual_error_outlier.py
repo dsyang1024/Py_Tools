@@ -6,7 +6,9 @@ import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
 import hydroeval as he
 import warnings
+import os
 
+path = os.getcwd()
 
 plt.style.use('seaborn')
 sns.set_style({'font_scale':'0.5', 'font.family': 'serif', 'font.serif': ['Times New Roman']})
@@ -32,10 +34,24 @@ ax.annotate('Outlier', xy=(165,85), xytext=(158,82),
             arrowprops=dict(arrowstyle='->', ec='grey', lw=2), bbox = dict(boxstyle="round", fc="0.8"))
 
 
+# NSE, R2 calculation
+r2 = (np.corrcoef(df_flow['obs'], df_flow['sim']))[0, 1]** 2
+r2_val = round(r2, 3)
+nse = he.evaluator(he.nse, np.array(df_flow['obs']), np.array(df_flow['sim']))
+nse_val = round(nse[0], 3)
+
+
 # labels and title
+lims = (0, max(df_flow.max()))
+# ax.set(xlim=lims, ylim=lims)
+
 plt.xlabel('Simulation', fontsize=14)
 plt.ylabel('Observation', fontsize=14)
 plt.title('Relation between obs. and sim.', fontsize=15)
+# write r2, nse in the graph
+plt.text(1, lims[1]*0.9, r'$R^2: $'+str(r2_val), fontdict={'size': 12})
+plt.text(1, lims[1] * 0.85, r'$NSE: $' + str(nse_val), fontdict={'size': 12})
+
 plt.show()
 
 
@@ -66,6 +82,11 @@ import statsmodels.api as sm
 from statsmodels.formula.api import ols
 from statsmodels.stats.outliers_influence import OLSInfluence
 
+# Cook's distance
+threshold = 4 / len(df_flow)
+print('Cook\'s distance: ', round(threshold, 2))
+
+
 # fit the regression model using statsmodels library 
 f = 'obs ~ sim'
 model = ols(formula=f, data=df_flow).fit()
@@ -85,17 +106,13 @@ sns.scatterplot(df_flow.sim, df_flow.obs, hue=distance, size=distance, sizes=(50
 plt.xlabel('Simulation', fontsize=14)
 plt.ylabel('Observation', fontsize=14)
 plt.title('Cook\'s distance', fontsize=15)
+plt.text(1, lims[1]*0.8, 'D= '+str(round(threshold, 3)), fontdict={'size': 12})
 plt.show()
 
 
 
 
 
-
-
-
-# this should be the number of input data
-threshold = 4/len(df_flow)
 
 # the observations with Cook's distances higher than the threshold value are labeled in the plot
 influencial_data = distance[distance > threshold]
@@ -153,14 +170,14 @@ std_d = pd.DataFrame(std_d)
 
 
 # drawing graph
-lims = (0, data['Simulation'].max())
+lims = (0, max(data.max()))
 plt.figure(figsize=(7,7), edgecolor='black')
 r2graph = sns.regplot(x="Simulation", y="Observation", data=data, color='dimgray', line_kws={'color':'r'}, scatter_kws={'s':40})
 sns.lineplot('Simulation', 'Observation', data = std_d, dashes=(2,2), color='lime', linewidth=0.75)
 
 
 r2graph.set(xlim=lims, ylim=lims)
-# plt.savefig(path + '/' + 'r2.png', dpi=300)
+plt.savefig(path + '/' + 'outliered.png', dpi=300)
 # write r2, nse in the graph
 plt.text(1, lims[1]*0.9, r'$R^2: $'+str(r2_val), fontdict={'size': 12})
 plt.text(1, lims[1] * 0.85, r'$NSE: $' + str(nse_val), fontdict={'size': 12})
