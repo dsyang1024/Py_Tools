@@ -1,3 +1,7 @@
+# Dongseok Yang.
+# Kangwon National University
+# Any issues can be reported to dongseok.yang@kangwon.ac.kr
+# Have good day!
 
 import pandas as pd
 import numpy as np
