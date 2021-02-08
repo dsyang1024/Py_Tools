@@ -1,3 +1,8 @@
+# Dongseok Yang.
+# Kangwon National University
+# Any issues can be reported to dongseok.yang@kangwon.ac.kr
+# Have good day!
+
 #유량 자료를 기준으로 유황별 정렬하기
 from datetime import date
 from matplotlib import pyplot as plt
